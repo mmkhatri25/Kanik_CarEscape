@@ -355,7 +355,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("YOU LOST !");
 
-        PlayerPrefs.SetInt("Level", 50); //reset level 0 do uncomment
+        PlayerPrefs.SetInt("Level", 69); //reset level 0 do uncomment
         PlayerPrefs.Save();
         Debug.Log("YOU LOST !" + PlayerPrefs.GetInt("Level"));
         currentLevel = PlayerPrefs.GetInt("Level");

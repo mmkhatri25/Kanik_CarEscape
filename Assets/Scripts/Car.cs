@@ -13,7 +13,7 @@ public enum Direction
 public class Car : MonoBehaviour
 {
     public Direction direction;
-    int NumberOfTurns;
+    public int NumberOfTurns;
 
     Vector3 carTargetDirection;
 
