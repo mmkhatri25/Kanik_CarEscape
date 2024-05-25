@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -24,6 +25,25 @@ public class UIManager : MonoBehaviour
     public bool isTestLevel;
 
     public event Action OnSoundClicked;
+
+    public GameObject PausePopup;
+
+    public void OnPauseBtn()
+    {
+
+        PausePopup.SetActive(true);
+        Time.timeScale = 0;
+
+    }
+    public void OnClosePause()
+    {
+        Time.timeScale = 1;
+        PausePopup.SetActive(false);
+    }
+    public void MainManuButton()
+    {
+        SceneManager.LoadScene(0);
+    }
 
     public static UIManager Instance
     {

@@ -260,8 +260,10 @@ public class GameManager : MonoBehaviour
         logoScreen.DOFade(1f, .2f)
             .OnComplete(() =>
             {
-                if (SceneExists("Level_" + currentLevel))
-                {
+            if (SceneExists("Level_" + currentLevel))
+            {
+                //currentLevel = PlayerPrefs.GetInt("Level");
+                Debug.Log("Levelis "+ currentLevel);
                     SceneManager.LoadScene("Level_" + currentLevel);
                     //SceneManager.LoadScene("Level_" + 29);
                 }
@@ -355,10 +357,11 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("YOU LOST !");
 
-        PlayerPrefs.SetInt("Level", 69); //reset level 0 do uncomment
+        PlayerPrefs.SetInt("Level", 1); //reset level 0 do uncomment
+        currentLevel = PlayerPrefs.GetInt("Level");
         PlayerPrefs.Save();
         Debug.Log("YOU LOST !" + PlayerPrefs.GetInt("Level"));
-        currentLevel = PlayerPrefs.GetInt("Level");
+        //currentLevel = PlayerPrefs.GetInt("Level");
         OnLose?.Invoke();
         //SceneManager.LoadScene(0);
         //CarsInLevel.Clear();
