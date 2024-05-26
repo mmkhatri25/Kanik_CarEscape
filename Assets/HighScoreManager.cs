@@ -45,11 +45,12 @@ public class HighScoreManager : MonoBehaviour
         {
             highScoreText.text = Score.ToString();
         }
-        if (highScore > PlayerPrefs.GetInt("HighScore", 0))
+        if (highScore > PlayerPrefs.GetInt("HighScore"))
         {
             // Save the new high score to PlayerPrefs
             PlayerPrefs.SetInt("HighScore", highScore);
             PlayerPrefs.Save();
+            LeaderBoard.onUpdateScore?.Invoke();
         }
 
     }

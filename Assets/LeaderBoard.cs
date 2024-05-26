@@ -9,14 +9,42 @@ public class LeaderBoard : MonoBehaviour
     public string playerName;
 
     private List<PlayerScore> scores;
+    private int lastHighScore;
+    public static System.Action onUpdateScore;
+    private void OnEnable()
+    {
+        onUpdateScore += UpdatePlayerScore;
+    }
+    private void OnDisable()
+    {
+        onUpdateScore -= UpdatePlayerScore;
 
+    }
     // Start is called before the first frame update
     void Start()
     {
         GenerateFakeScores();
         AddPlayerScore();
+
+        lastHighScore = PlayerPrefs.GetInt("HighScore");
         DisplayLeaderboard();
+
     }
+
+    // Update is called once per frame
+    //void Update()
+    //{
+    //    int currentHighScore = PlayerPrefs.GetInt("HighScore");
+    //    print("update - " + currentHighScore);
+
+    //    if (currentHighScore > lastHighScore)
+    //    {
+    //        print("in update - "+ currentHighScore);
+    //        lastHighScore = currentHighScore;
+    //        UpdatePlayerScore();
+    //        //DisplayLeaderboard();
+    //    }
+    //}
 
     void GenerateFakeScores()
     {
@@ -27,23 +55,23 @@ public class LeaderBoard : MonoBehaviour
         List<string> realNames = new List<string>
         {
             "Alice", "Bob", "Charlie", "David", "Eve",
-        "Frank", "Grace", "Hannah", "Ivy", "Jack",
-        "Kate", "Liam", "Mia", "Noah", "Olivia",
-        "Parker", "Quinn", "Ryan", "Sophia", "Tyler",
-        "Uma", "Vincent", "Willow", "Xander", "Yara",
-        "Zoe",
-        
-        // Indian names
-        "Aarav", "Aarohi", "Aryan", "Ananya", "Aisha",
-        "Dev", "Diya", "Ishaan", "Jiya", "Kabir",
-        "Kavya", "Neha", "Rohan", "Riya", "Sahil",
-        "Sanya", "Tanisha", "Vivaan", "Yash", "Zara",
-        
-        // Pakistani names
-        "Ahmed", "Ayesha", "Bilal", "Fariha", "Hassan",
-        "Iqra", "Junaid", "Mahnoor", "Omar", "Sana",
-        "Tariq", "Zainab", "Arham", "Bushra", "Farhan",
-        "Ghazala", "Imran", "Javeria", "Khalid", "Nadia"
+            "Frank", "Grace", "Hannah", "Ivy", "Jack",
+            "Kate", "Liam", "Mia", "Noah", "Olivia",
+            "Parker", "Quinn", "Ryan", "Sophia", "Tyler",
+            "Uma", "Vincent", "Willow", "Xander", "Yara",
+            "Zoe",
+
+            // Indian names
+            "Aarav", "Aarohi", "Aryan", "Ananya", "Aisha",
+            "Dev", "Diya", "Ishaan", "Jiya", "Kabir",
+            "Kavya", "Neha", "Rohan", "Riya", "Sahil",
+            "Sanya", "Tanisha", "Vivaan", "Yash", "Zara",
+
+            // Pakistani names
+            "Ahmed", "Ayesha", "Bilal", "Fariha", "Hassan",
+            "Iqra", "Junaid", "Mahnoor", "Omar", "Sana",
+            "Tariq", "Zainab", "Arham", "Bushra", "Farhan",
+            "Ghazala", "Imran", "Javeria", "Khalid", "Nadia"
         };
 
         // Create fake player names and scores
@@ -63,6 +91,20 @@ public class LeaderBoard : MonoBehaviour
         scores.Sort((a, b) => b.score.CompareTo(a.score));
     }
 
+    void UpdatePlayerScore()
+    {
+        print("UpdatePlayerScore");
+        // Remove the old player's score entry
+        scores.RemoveAll(score => score.name == playerName);
+
+        // Add the updated player's score
+        scores.Add(new PlayerScore(playerName, PlayerPrefs.GetInt("HighScore")));
+
+        // Sort the list by scores in descending order
+        scores.Sort((a, b) => b.score.CompareTo(a.score));
+        DisplayLeaderboard();
+    }
+    public Text myHighscore;
     void DisplayLeaderboard()
     {
         // Clear previous entries
@@ -79,6 +121,7 @@ public class LeaderBoard : MonoBehaviour
             entryText.text = (i + 1).ToString() + ". " + scores[i].name + " - " + scores[i].score.ToString();
             if (scores[i].name == playerName && scores[i].score == PlayerPrefs.GetInt("HighScore"))
             {
+                myHighscore.text = entryText.text;
                 entryText.color = Color.yellow; // Change this to any color you like
             }
             else
