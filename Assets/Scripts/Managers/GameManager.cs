@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
     public bool isSoundOn = true;
 
     public bool isActive;
+
+    public List<int> playedLevels = new List<int>();
+
     public static GameManager Instance
     {
         get
@@ -56,18 +59,13 @@ public class GameManager : MonoBehaviour
 
     public int carsInitialCount;
 
-
-
     public GameObject level_complete_UI, In_game_UI;
     public GameObject level_lose_UI;
     [Space]
     public TextMeshProUGUI m_total_coin_text;
     public TextMeshProUGUI higscoreText, TimeoutText;
-   
 
     public CanvasGroup logoScreen;
-
-
 
     #region Variables
 
@@ -80,7 +78,6 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-
     private void Awake()
     {
         //PlayerPrefs.SetInt("Level", 29);
@@ -88,7 +85,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-
         // Subscribe to the sceneLoaded event
         SceneManager.sceneLoaded += OnSceneLoaded;
 
@@ -97,13 +93,9 @@ public class GameManager : MonoBehaviour
             Invoke("InitGame", 1.5f);
         }
 
-        OnSceneLoaded(SceneManager.GetActiveScene(),LoadSceneMode.Single);
-
-
-
-
-       
+        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
+
     void Update()
     {
         if (timerIsRunning)
@@ -123,6 +115,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
     void DisplayTime(float timeToDisplay)
     {
         timeToDisplay += 1; // To show time in a more user-friendly manner (optional)
@@ -140,24 +133,112 @@ public class GameManager : MonoBehaviour
 
     void InitGame()
     {
-        Debug.Log("Worked");
+        Debug.Log("InitGame called");
 
-        currentLevel = PlayerPrefs.GetInt("Level");
+        currentLevel = PlayerPrefs.GetInt("Level", 0);
         if (currentLevel == 0)
         {
             currentLevel = 1;
-
             PlayerPrefs.SetInt("Level", currentLevel);
+            PlayerPrefs.Save();
         }
 
-        if (SceneExists("Level_" + currentLevel))
+        Debug.Log("Starting Level: " + currentLevel);
+        LoadNextLevel(currentLevel);
+    }
+
+    void LoadNextLevel(int currentLevel)
+    {
+        if (currentLevel <= 15)
         {
-            SceneManager.LoadScene("Level_" + currentLevel);
+            int nextLevel = GetNextRandomLevelWithinFirst15();
+            LoadLevel(nextLevel);
+            Debug.Log("LoadNextLevel --1, next level: " + nextLevel);
         }
         else
         {
-            SceneManager.LoadScene("Level_" + UnityEngine.Random.Range(10, 30));
+            // Load random levels from 16 to 100 without repetition until all levels are played
+            int nextLevel = GetNextRandomLevel();
+            LoadLevel(nextLevel);
         }
+    }
+
+    int GetNextRandomLevelWithinFirst15()
+    {
+        int nextLevel = 0;
+
+        if (playedLevels.Count >= 15) // Reset if all 15 levels have been played
+        {
+            playedLevels.Clear();
+        }
+
+        do
+        {
+            nextLevel = UnityEngine.Random.Range(1, 16);
+        } while (playedLevels.Contains(nextLevel));
+
+        playedLevels.Add(nextLevel);
+
+        return nextLevel;
+    }
+
+    int GetNextRandomLevel()
+    {
+        int nextLevel = 0;
+
+        if (playedLevels.Count >= 85) // 100 - 15 = 85 levels to randomize
+        {
+            // If all levels from 16 to 100 have been played, clear the list and start over
+            playedLevels.Clear();
+        }
+
+        do
+        {
+            nextLevel = UnityEngine.Random.Range(16, 101);
+        } while (playedLevels.Contains(nextLevel));
+
+        playedLevels.Add(nextLevel);
+
+        return nextLevel;
+    }
+
+
+    void LoadLevel(int level)
+    {
+        string levelName = "Level_" + level;
+        Debug.Log("Loading Level: " + levelName);
+
+        if (IsSceneExists(levelName))
+        {
+            Debug.Log("IsSceneExists Loading Level: " + levelName + " , IsSceneExists - " + IsSceneExists(levelName));
+
+            SceneManager.LoadScene(levelName);
+            //PlayerPrefs.SetInt("Level", level);
+            //PlayerPrefs.Save();
+        }
+        else
+        {
+            // Fallback in case the level scene does not exist
+            int fallbackLevel = UnityEngine.Random.Range(10, 30);
+            Debug.LogWarning("Level does not exist, loading fallback level: Level_" + fallbackLevel);
+            SceneManager.LoadScene("Level_" + fallbackLevel);
+        }
+    }
+
+
+    bool IsSceneExists(string name)
+    {
+        // Check if a scene exists in the build settings
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+            if (sceneName == name)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void CarClicked()
@@ -201,14 +282,13 @@ public class GameManager : MonoBehaviour
         Destroy(carEscaped);
     }
 
-    public void UpdateCoins(int amout)
+    public void UpdateCoins(int amount)
     {
-        Debug.Log("UpdateCoins " + amout);
-        playerCoins = playerCoins+ amout;
+        Debug.Log("UpdateCoins " + amount);
+        playerCoins = playerCoins + amount;
 
         PlayerPrefs.SetInt("playercoins", playerCoins);
         Debug.Log("playerCoins " + playerCoins);
-
 
         CoinsAdded?.Invoke();
     }
@@ -218,10 +298,8 @@ public class GameManager : MonoBehaviour
         // show ads on level finished
         Debug.Log("Level Finished !");
         m_total_coin_text.transform.parent.gameObject.SetActive(false);
-        UpdateCoins(GameManager.Instance.coinsEarnedInCurrentLevel/*PlayerPrefs.GetInt("playercoins")*/);
+        UpdateCoins(GameManager.Instance.coinsEarnedInCurrentLevel);
 
-        //level_complete_UI.SetActive(true);
-        //level_complete_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_COMPLETE");
         LoadNextLevelDelay();
         OnLevelFinished?.Invoke();
     }
@@ -243,9 +321,15 @@ public class GameManager : MonoBehaviour
 
     void LoadNextLevel()
     {
+        int currentLevel = PlayerPrefs.GetInt("Level");
         currentLevel++;
 
+        // Save the new current level
         PlayerPrefs.SetInt("Level", currentLevel);
+        PlayerPrefs.Save();
+
+        // Load the next level
+        //LoadNextLevel(currentLevel);
 
         ShowLogoScreen();
     }
@@ -260,34 +344,27 @@ public class GameManager : MonoBehaviour
         logoScreen.DOFade(1f, .2f)
             .OnComplete(() =>
             {
-            if (SceneExists("Level_" + currentLevel))
-            {
-                //currentLevel = PlayerPrefs.GetInt("Level");
-                Debug.Log("Levelis "+ currentLevel);
-                    SceneManager.LoadScene("Level_" + currentLevel);
-                    //SceneManager.LoadScene("Level_" + 29);
-                }
-                else
-                {
-                    SceneManager.LoadScene("Level_" + UnityEngine.Random.Range(10, 30));
-                }
+                int currentLevel = PlayerPrefs.GetInt("Level");
+                LoadNextLevel(currentLevel);
+                //if (SceneExists("Level_" + currentLevel))
+                //{
+                //    Debug.Log("Level is " + currentLevel);
+                //    SceneManager.LoadScene("Level_" + currentLevel);
+                //}
+                //else
+                //{
+                //    SceneManager.LoadScene("Level_" + UnityEngine.Random.Range(10, 30));
+                //}
             });
     }
 
     bool SceneExists(string sceneName)
     {
-
         // Iterate through all loaded scenes and check if the specified scene exists
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
         {
             string pathToScene = SceneUtility.GetScenePathByBuildIndex(i);
             string loadedScene = System.IO.Path.GetFileNameWithoutExtension(pathToScene);
-
-            /*Debug.Log("LgCoreReloader: Reloading to scene(0): " + sceneName);
-
-            Scene loadedScene = SceneManager.GetSceneByBuildIndex(i);
-            Debug.LogWarning(loadedScene.name);
-            */
 
             if (loadedScene == sceneName)
             {
@@ -322,14 +399,12 @@ public class GameManager : MonoBehaviour
 
             carsInitialCount = CarsInLevel.Count;
 
-
             //======= Timer
             carCount = CarsInLevel.Count;
             // Calculate time based on the number of cars
             timeRemaining = carCount * 5f;
             timerIsRunning = true;
-            popup.SetActive(false); // Ensure the popup is hidden at th
-
+            popup.SetActive(false); // Ensure the popup is hidden at the start
             //======= Timer
         }
         m_total_coin_text.transform.parent.gameObject.SetActive(true);
@@ -345,25 +420,24 @@ public class GameManager : MonoBehaviour
     public void LevelLose()
     {
         if (timeout)
-        
             TimeoutText.gameObject.SetActive(true);
         else
             TimeoutText.gameObject.SetActive(false);
         timeout = false;
+
         HighScoreManager.OnResetScore?.Invoke();
+
         higscoreText.text = PlayerPrefs.GetInt("HighScore").ToString();
+
         level_lose_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_FAIL");
         level_lose_UI.SetActive(true);
 
         Debug.Log("YOU LOST !");
-
-        PlayerPrefs.SetInt("Level", 1); //reset level 0 do uncomment
-        currentLevel = PlayerPrefs.GetInt("Level");
+        playedLevels.Clear();
+        PlayerPrefs.SetInt("Level", 1); // reset level to 1
         PlayerPrefs.Save();
-        Debug.Log("YOU LOST !" + PlayerPrefs.GetInt("Level"));
-        //currentLevel = PlayerPrefs.GetInt("Level");
+        currentLevel = PlayerPrefs.GetInt("Level");
+        Debug.Log("YOU LOST !" + currentLevel);
         OnLose?.Invoke();
-        //SceneManager.LoadScene(0);
-        //CarsInLevel.Clear();
     }
 }

@@ -93,7 +93,7 @@ public class Pedestrian : MonoBehaviour
 
             Vector3 forceDirection = (this.transform.position - c.transform.position).normalized;
 
-            Invoke("StopCar", 0.3f);
+            Invoke("StopCar", 0.1f);
 
             OnHit(forceDirection);
         }
