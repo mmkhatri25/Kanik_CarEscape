@@ -143,6 +143,8 @@
 //        this.score = score;
 //    }
 //}
+
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -151,6 +153,7 @@ using UnityEngine.UI;
 public class LeaderBoard : MonoBehaviour
 {
     public Text[] highScoreTexts; // UI Text elements to display the high scores
+    public Text[] highScoreTexts1; // UI Text elements to display the high scores
     public List<int> highScores;
     private const int maxScores = 5;
 
@@ -159,22 +162,23 @@ public class LeaderBoard : MonoBehaviour
     private void OnEnable()
     {
         OnAddNewHighScore += AddNewScore;
+        LoadHighScores();
+
+        // Update the UI with the loaded high scores
+        UpdateHighScoreUI();
     }
     private void OnDisable()
     {
         OnAddNewHighScore -= AddNewScore;
 
     }
-
+    
     void Start()
     {
         highScores = new List<int>();
 
         // Load high scores from PlayerPrefs
-        LoadHighScores();
-
-        // Update the UI with the loaded high scores
-        UpdateHighScoreUI();
+      
     }
 
     public void AddNewScore(int newScore)
@@ -236,10 +240,12 @@ public class LeaderBoard : MonoBehaviour
             if (i < highScores.Count)
             {
                 highScoreTexts[i].text = highScores[i].ToString();
+                highScoreTexts1[i].text = highScores[i].ToString();
             }
             else
             {
                 highScoreTexts[i].text = "0";
+                highScoreTexts1[i].text = "0";
             }
         }
     }

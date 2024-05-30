@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
     public float timeRemaining;
     private bool timerIsRunning = false;
     public int CurrentScore;
+    public GameObject mainMenu, FadeScreen;
 
     #endregion
 
@@ -91,13 +92,31 @@ public class GameManager : MonoBehaviour
         // Subscribe to the sceneLoaded event
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        if (SceneManager.GetActiveScene().name == "StartScene")
-        {
-            Invoke("InitGame", 1.5f);
-        }
+        //if (SceneManager.GetActiveScene().name == "StartScene")
+        //{
+        //    Invoke("InitGame", 1.5f);
+        //}
 
-        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+        //OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     
+    }
+
+    public void OnStartButton()
+    {
+        Time.timeScale = 1;
+        isGameOver = false;
+        timeout = false;
+        HighScoreManager.OnResetHighScore?.Invoke();
+        HighScoreManager.OnResetScore?.Invoke();
+        mainMenu.SetActive(false);
+        FadeScreen.SetActive(true);
+        //if (SceneManager.GetActiveScene().name == "StartScene")
+        //{
+            Invoke("InitGame", .3f);
+        //}
+
+        //OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+
     }
 
     void Update()
@@ -137,6 +156,7 @@ public class GameManager : MonoBehaviour
 
     void InitGame()
     {
+        //SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
         Debug.Log("InitGame called");
 
         currentLevel = PlayerPrefs.GetInt("Level", 0);
@@ -215,6 +235,7 @@ public class GameManager : MonoBehaviour
         if (IsSceneExists(levelName))
         {
             //Debug.Log("IsSceneExists Loading Level: " + levelName + " , IsSceneExists - " + IsSceneExists(levelName));
+            //FadeScreen.SetActive(false);
 
             SceneManager.LoadScene(levelName);
             //PlayerPrefs.SetInt("Level", level);
@@ -223,8 +244,9 @@ public class GameManager : MonoBehaviour
         else
         {
             // Fallback in case the level scene does not exist
-            int fallbackLevel = UnityEngine.Random.Range(10, 30);
+            int fallbackLevel = UnityEngine.Random.Range(10, 99);
             //Debug.LogWarning("Level does not exist, loading fallback level: Level_" + fallbackLevel);
+
             SceneManager.LoadScene("Level_" + fallbackLevel);
         }
     }
@@ -256,7 +278,7 @@ public class GameManager : MonoBehaviour
     }
 
     GameObject carEscaped;
-    private bool timeout;
+    public bool timeout;
 
     public void CarEscape(GameObject car)
     {
@@ -321,7 +343,14 @@ public class GameManager : MonoBehaviour
     }
     public void MainMenu()
     {
-        ShowLogoScreen1();
+        isGameOver = false;
+        timeout = false;
+        HighScoreManager.OnResetHighScore?.Invoke();
+        HighScoreManager.OnResetScore?.Invoke();
+
+        //ShowLogoScreen1();
+        SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
+        mainMenu.SetActive(true);
     }
 
     public void LoadNextLevelDelay()
@@ -360,7 +389,8 @@ public class GameManager : MonoBehaviour
         logoScreen.DOFade(1f, .2f)
             .OnComplete(() =>
             {
-                RestartAndroidApp();
+                mainMenu.SetActive(true);
+                //RestartAndroidApp();
             });
     }
     private void RestartAndroidApp()
@@ -477,22 +507,32 @@ public class GameManager : MonoBehaviour
             //Debug.LogError("An error occurred while updating the total coin text: " + ex.Message);
             // Optionally, you can also log the stack
         }
-        }
+        FadeScreen.SetActive(false);
 
-        void HideLogoScreen()
+    }
+
+    void HideLogoScreen()
     {
         logoScreen.DOFade(0f, 1.35f)
             .OnComplete(() => logoScreen.gameObject.SetActive(false));
     }
+    public bool isGameOver;
 
     public void LevelLose()
     {
-        if (timeout)
+        if (isGameOver)
+            return;
+
+        if (timeout && !isGameOver)
             TimeoutText.gameObject.SetActive(true);
         else
             TimeoutText.gameObject.SetActive(false);
-        timeout = false;
 
+        isGameOver = true;
+        
+        
+        timeout = false;
+        
         HighScoreManager.OnResetScore?.Invoke();
         HighScoreManager.OnAddNewHighscore?.Invoke();
 
@@ -500,7 +540,6 @@ public class GameManager : MonoBehaviour
 
         level_lose_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_FAIL");
         level_lose_UI.SetActive(true);
-
         Debug.Log("YOU LOST !");
         playedLevels.Clear();
         PlayerPrefs.SetInt("Level", 1); // reset level to 1
@@ -508,5 +547,7 @@ public class GameManager : MonoBehaviour
         currentLevel = PlayerPrefs.GetInt("Level");
         Debug.Log("YOU LOST !" + currentLevel);
         OnLose?.Invoke();
+     
+
     }
 }

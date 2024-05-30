@@ -33,7 +33,7 @@ public class UIManager : MonoBehaviour
     public GameObject PausePopup;
     public GameObject persistentObject;
     public GameObject[] rootObjects;
-
+    public GameObject mainMenu;
     public void OnPauseBtn()
     {
         HighScoreManager.OnAddNewHighscore?.Invoke();
@@ -49,15 +49,17 @@ public class UIManager : MonoBehaviour
     public void MainManuButton()
     {
         HighScoreManager.OnAddNewHighscore?.Invoke();
-
+        SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
         //if (persistentObject != null)
         //{
         //    Destroy(persistentObject);
         //}
-        DestroyAllObjectsInHierarchy();
+        //DestroyAllObjectsInHierarchy();
         //LoadNewScene(0);
         //SceneManager.LoadScene(0);
         //RestartAndroidApp();
+        PausePopup.SetActive(false);
+        mainMenu.SetActive(true);
     }
     public void LoadNewScene(int sceneIndex)
     {
