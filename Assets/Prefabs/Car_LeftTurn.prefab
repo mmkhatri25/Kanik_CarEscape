@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   direction: 1
+  NumberOfTurns: 0
   overallSpeed: 4.36
   speed: 0.91
   rotationSpeed: 143.1
@@ -127,7 +128,7 @@ Transform:
   m_GameObject: {fileID: 8987155453174097675}
   m_LocalRotation: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
   m_LocalPosition: {x: 0, y: 0.25, z: -0.04999992}
-  m_LocalScale: {x: 0.07, y: 0.07, z: 0.07}
+  m_LocalScale: {x: 0.1534902, y: 0.1534902, z: 0.1534902}
   m_Children: []
   m_Father: {fileID: 6144669795594752170}
   m_RootOrder: 6

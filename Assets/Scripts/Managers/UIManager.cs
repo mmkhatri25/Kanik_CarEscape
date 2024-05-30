@@ -7,9 +7,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+using System.Reflection;
+
+
+
 public class UIManager : MonoBehaviour
 {
-    static UIManager instance;
+    public static UIManager instance;
 
     public TextMeshProUGUI coinEarnedText;
     public TextMeshProUGUI playerCoinsText;
@@ -27,10 +31,12 @@ public class UIManager : MonoBehaviour
     public event Action OnSoundClicked;
 
     public GameObject PausePopup;
+    public GameObject persistentObject;
+    public GameObject[] rootObjects;
 
     public void OnPauseBtn()
     {
-
+        HighScoreManager.OnAddNewHighscore?.Invoke();
         PausePopup.SetActive(true);
         Time.timeScale = 0;
 
@@ -42,7 +48,110 @@ public class UIManager : MonoBehaviour
     }
     public void MainManuButton()
     {
-        SceneManager.LoadScene(0);
+        HighScoreManager.OnAddNewHighscore?.Invoke();
+
+        //if (persistentObject != null)
+        //{
+        //    Destroy(persistentObject);
+        //}
+        DestroyAllObjectsInHierarchy();
+        //LoadNewScene(0);
+        //SceneManager.LoadScene(0);
+        //RestartAndroidApp();
+    }
+    public void LoadNewScene(int sceneIndex)
+    {
+        // Destroy all objects in the current hierarchy
+        DestroyAllObjectsInHierarchy();
+
+        // Destroy objects marked with DontDestroyOnLoad
+        DestroyAllDontDestroyOnLoadObjects();
+
+        // Load the new scene
+        SceneManager.LoadScene(sceneIndex);
+    }
+
+    // Helper method to destroy all objects in the current scene's hierarchy
+    private void DestroyAllObjectsInHierarchy()
+    {
+        // Get an array of all root game objects in the current scene
+        rootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+
+        // Loop through each root object and destroy it
+        foreach (GameObject obj in rootObjects)
+        {
+            Destroy(obj);
+        }
+    }
+
+    // Helper method to destroy all objects marked with DontDestroyOnLoad
+    private void DestroyAllDontDestroyOnLoadObjects()
+    {
+        // Create a new temporary scene
+        var tempScene = SceneManager.CreateScene("TempScene");
+
+        // Move all objects from DontDestroyOnLoad to the temporary scene
+        var dontDestroyOnLoadObjects = GetDontDestroyOnLoadObjects();
+        foreach (var obj in dontDestroyOnLoadObjects)
+        {
+            SceneManager.MoveGameObjectToScene(obj, tempScene);
+        }
+
+        // Unload the temporary scene, destroying all objects in it
+        SceneManager.UnloadSceneAsync(tempScene);
+    }
+
+    // Helper method to find all objects marked with DontDestroyOnLoad
+    private GameObject[] GetDontDestroyOnLoadObjects()
+    {
+        // Find a temporary object to access the root objects of DontDestroyOnLoad
+        GameObject temp = null;
+        try
+        {
+            temp = new GameObject();
+            DontDestroyOnLoad(temp);
+            var dontDestroyOnLoadScene = temp.scene;
+
+            // Get all root game objects in the DontDestroyOnLoad scene
+            var rootObjects = dontDestroyOnLoadScene.GetRootGameObjects();
+            return rootObjects;
+        }
+        finally
+        {
+            if (temp != null)
+            {
+                Destroy(temp);
+            }
+        }
+    }
+    private void RestartAndroidApp()
+    {
+        Debug.Log("1 RestartAndroidApp");
+
+        // Obtain the UnityPlayer class and the current activity
+        
+        using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            AndroidJavaObject pm = currentActivity.Call<AndroidJavaObject>("getPackageManager");
+            AndroidJavaObject launchIntent = pm.Call<AndroidJavaObject>("getLaunchIntentForPackage", Application.identifier);
+
+            // Set the FLAG_ACTIVITY_CLEAR_TOP flag to clear the back stack
+            launchIntent.Call<AndroidJavaObject>("addFlags", 0x20000000); // FLAG_ACTIVITY_CLEAR_TOP
+
+            // Use a handler to restart the app
+            AndroidJavaRunnable restartRunnable = new AndroidJavaRunnable(() =>
+            {
+                currentActivity.Call("startActivity", launchIntent);
+                currentActivity.Call("finish");
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            });
+
+            currentActivity.Call("runOnUiThread", restartRunnable);
+        }
+
+        // Close the app
+        System.Diagnostics.Process.GetCurrentProcess().Kill();
     }
 
     public static UIManager Instance
@@ -68,9 +177,18 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        persistentObject = GameObject.Find("MANAGERS_AND_UI");
+
         GameManager.Instance.OnLevelFinished += OnLevelFinished;
         GameManager.Instance.CoinsAdded += CoinsAdded;
         GameManager.Instance.LevelLoaded += LevelLoaded;
+
+        int Number = PlayerPrefs.GetInt("isSound");
+        bool soundOn = Number == 0 ? false : true;
+        GameManager.Instance.isSoundOn = soundOn;
+        OnSoundClicked?.Invoke();
+        SetSoundUI(soundOn);
+
     }
 
     private void LevelLoaded()
@@ -105,6 +223,13 @@ public class UIManager : MonoBehaviour
     public void SoundClick()
     {
         bool soundOn = !GameManager.Instance.isSoundOn;
+        int Numberr = PlayerPrefs.GetInt("isSound");
+        if (Numberr == 1)
+            PlayerPrefs.SetInt("isSound", 0);
+        else
+            PlayerPrefs.SetInt("isSound", 1);
+
+
         GameManager.Instance.isSoundOn = soundOn;
 
         OnSoundClicked?.Invoke();
@@ -114,6 +239,7 @@ public class UIManager : MonoBehaviour
 
     void SetSoundUI(bool soundOn)
     {
+        Debug.Log("gameplay SetSoundUI " + soundOn);
         if (soundOn)
         {
             SoundObj.sprite = soundOnSprite;

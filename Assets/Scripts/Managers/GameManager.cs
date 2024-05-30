@@ -26,6 +26,8 @@ public class GameManager : MonoBehaviour
 
     public List<int> playedLevels = new List<int>();
 
+    public float carTime;
+
     public static GameManager Instance
     {
         get
@@ -73,8 +75,9 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI timerText; // UI Text to display the timer
     public GameObject popup; // The popup to show when the timer expires
 
-    private float timeRemaining;
+    public float timeRemaining;
     private bool timerIsRunning = false;
+    public int CurrentScore;
 
     #endregion
 
@@ -94,6 +97,7 @@ public class GameManager : MonoBehaviour
         }
 
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+    
     }
 
     void Update()
@@ -143,7 +147,7 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        Debug.Log("Starting Level: " + currentLevel);
+        //Debug.Log("Starting Level: " + currentLevel);
         LoadNextLevel(currentLevel);
     }
 
@@ -153,7 +157,7 @@ public class GameManager : MonoBehaviour
         {
             int nextLevel = GetNextRandomLevelWithinFirst15();
             LoadLevel(nextLevel);
-            Debug.Log("LoadNextLevel --1, next level: " + nextLevel);
+            //Debug.Log("LoadNextLevel --1, next level: " + nextLevel);
         }
         else
         {
@@ -210,7 +214,7 @@ public class GameManager : MonoBehaviour
 
         if (IsSceneExists(levelName))
         {
-            Debug.Log("IsSceneExists Loading Level: " + levelName + " , IsSceneExists - " + IsSceneExists(levelName));
+            //Debug.Log("IsSceneExists Loading Level: " + levelName + " , IsSceneExists - " + IsSceneExists(levelName));
 
             SceneManager.LoadScene(levelName);
             //PlayerPrefs.SetInt("Level", level);
@@ -220,7 +224,7 @@ public class GameManager : MonoBehaviour
         {
             // Fallback in case the level scene does not exist
             int fallbackLevel = UnityEngine.Random.Range(10, 30);
-            Debug.LogWarning("Level does not exist, loading fallback level: Level_" + fallbackLevel);
+            //Debug.LogWarning("Level does not exist, loading fallback level: Level_" + fallbackLevel);
             SceneManager.LoadScene("Level_" + fallbackLevel);
         }
     }
@@ -258,6 +262,8 @@ public class GameManager : MonoBehaviour
     {
         carEscaped = car;
         HighScoreManager.onHighScoreIncrease?.Invoke(10);
+        CurrentScore += 10;
+        higscoreText.text = CurrentScore.ToString();
         // spawn coin
         Instantiate(coinPrefab, car.transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
 
@@ -265,6 +271,8 @@ public class GameManager : MonoBehaviour
 
         if (CarsInLevel.Count <= 0)
         {
+            Debug.Log("timeRemaining - "+ timeRemaining);
+            HighScoreManager.onHighScoreIncrease?.Invoke((int) timeRemaining); 
             coinsEarnedInCurrentLevel = carsInitialCount * 2;
             Debug.Log("Here " + coinsEarnedInCurrentLevel);
             LevelFinished();
@@ -295,6 +303,9 @@ public class GameManager : MonoBehaviour
 
     public void LevelFinished()
     {
+        CurrentScore = 0;
+        higscoreText.text = "";
+        HighScoreManager.OnResetScore?.Invoke();
         // show ads on level finished
         Debug.Log("Level Finished !");
         m_total_coin_text.transform.parent.gameObject.SetActive(false);
@@ -307,6 +318,10 @@ public class GameManager : MonoBehaviour
     public void RestartLevel()
     {
         ShowLogoScreen();
+    }
+    public void MainMenu()
+    {
+        ShowLogoScreen1();
     }
 
     public void LoadNextLevelDelay()
@@ -321,6 +336,8 @@ public class GameManager : MonoBehaviour
 
     void LoadNextLevel()
     {
+        //CurrentScore = 0;
+        //higscoreText.text = CurrentScore.ToString(); 
         int currentLevel = PlayerPrefs.GetInt("Level");
         currentLevel++;
 
@@ -333,7 +350,47 @@ public class GameManager : MonoBehaviour
 
         ShowLogoScreen();
     }
+    void ShowLogoScreen1()
+    {
+        // Set the initial alpha to 0
+        logoScreen.alpha = 0f;
 
+        logoScreen.gameObject.SetActive(true);
+
+        logoScreen.DOFade(1f, .2f)
+            .OnComplete(() =>
+            {
+                RestartAndroidApp();
+            });
+    }
+    private void RestartAndroidApp()
+    {
+        Debug.Log("1 RestartAndroidApp");
+
+        // Obtain the UnityPlayer class and the current activity
+        using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            AndroidJavaObject pm = currentActivity.Call<AndroidJavaObject>("getPackageManager");
+            AndroidJavaObject launchIntent = pm.Call<AndroidJavaObject>("getLaunchIntentForPackage", Application.identifier);
+
+            // Set the FLAG_ACTIVITY_CLEAR_TOP flag to clear the back stack
+            launchIntent.Call<AndroidJavaObject>("addFlags", 0x20000000); // FLAG_ACTIVITY_CLEAR_TOP
+
+            // Use a handler to restart the app
+            AndroidJavaRunnable restartRunnable = new AndroidJavaRunnable(() =>
+            {
+                currentActivity.Call("startActivity", launchIntent);
+                currentActivity.Call("finish");
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            });
+
+            currentActivity.Call("runOnUiThread", restartRunnable);
+        }
+
+        // Close the app
+        System.Diagnostics.Process.GetCurrentProcess().Kill();
+    }
     void ShowLogoScreen()
     {
         // Set the initial alpha to 0
@@ -376,6 +433,9 @@ public class GameManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        //CurrentScore = 0;
+        //higscoreText.text = CurrentScore.ToString();
+
         // Check if the loaded scene is the one you are interested in
         if (scene.name.Contains("Level"))
         {
@@ -402,16 +462,24 @@ public class GameManager : MonoBehaviour
             //======= Timer
             carCount = CarsInLevel.Count;
             // Calculate time based on the number of cars
-            timeRemaining = carCount * 5f;
+            timeRemaining = carCount * carTime; ;
             timerIsRunning = true;
             popup.SetActive(false); // Ensure the popup is hidden at the start
             //======= Timer
         }
-        m_total_coin_text.transform.parent.gameObject.SetActive(true);
-        m_total_coin_text.text = PlayerPrefs.GetInt("playercoins").ToString("F0");
-    }
+        try
+        {
+            m_total_coin_text.transform.parent.gameObject.SetActive(true);
+            m_total_coin_text.text = PlayerPrefs.GetInt("playercoins").ToString("F0");
+        }
+        catch (Exception ex)
+        {
+            //Debug.LogError("An error occurred while updating the total coin text: " + ex.Message);
+            // Optionally, you can also log the stack
+        }
+        }
 
-    void HideLogoScreen()
+        void HideLogoScreen()
     {
         logoScreen.DOFade(0f, 1.35f)
             .OnComplete(() => logoScreen.gameObject.SetActive(false));
@@ -426,8 +494,9 @@ public class GameManager : MonoBehaviour
         timeout = false;
 
         HighScoreManager.OnResetScore?.Invoke();
+        HighScoreManager.OnAddNewHighscore?.Invoke();
 
-        higscoreText.text = PlayerPrefs.GetInt("HighScore").ToString();
+        higscoreText.text = CurrentScore.ToString();//PlayerPrefs.GetInt("HighScore").ToString();
 
         level_lose_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_FAIL");
         level_lose_UI.SetActive(true);

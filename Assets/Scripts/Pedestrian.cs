@@ -29,7 +29,7 @@ public class Pedestrian : MonoBehaviour
     {
         if (isWalking)
         {
-            print("iswalking");
+            //print("iswalking");
             t += speed * Time.deltaTime;
 
             // Use SmoothStep to create an ease-in motion
