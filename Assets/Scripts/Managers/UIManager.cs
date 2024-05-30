@@ -225,11 +225,11 @@ public class UIManager : MonoBehaviour
     public void SoundClick()
     {
         bool soundOn = !GameManager.Instance.isSoundOn;
-        int Numberr = PlayerPrefs.GetInt("isSound");
-        if (Numberr == 1)
-            PlayerPrefs.SetInt("isSound", 0);
-        else
-            PlayerPrefs.SetInt("isSound", 1);
+        //int Numberr = PlayerPrefs.GetInt("isSound");
+        //if (Numberr == 1)
+        //    PlayerPrefs.SetInt("isSound", 0);
+        //else
+        //    PlayerPrefs.SetInt("isSound", 1);
 
 
         GameManager.Instance.isSoundOn = soundOn;

@@ -162,6 +162,8 @@ public class LeaderBoard : MonoBehaviour
     private void OnEnable()
     {
         OnAddNewHighScore += AddNewScore;
+        highScores = new List<int>();
+
         LoadHighScores();
 
         // Update the UI with the loaded high scores
@@ -176,9 +178,12 @@ public class LeaderBoard : MonoBehaviour
     void Start()
     {
         highScores = new List<int>();
+        LoadHighScores();
 
+        // Update the UI with the loaded high scores
+        UpdateHighScoreUI();
         // Load high scores from PlayerPrefs
-      
+
     }
 
     public void AddNewScore(int newScore)
@@ -216,7 +221,9 @@ public class LeaderBoard : MonoBehaviour
         {
             if (PlayerPrefs.HasKey("HHighScore" + i))
             {
+                Debug.Log(i + PlayerPrefs.GetInt("HHighScore" + i));
                 highScores.Add(PlayerPrefs.GetInt("HHighScore" + i));
+                highScores.Sort((a, b) => b.CompareTo(a));
             }
             else
             {
