@@ -14,6 +14,7 @@ public class HighScoreManager : MonoBehaviour
     }
 
     public TextMeshProUGUI CurrentScore; // Reference to the UI Text component
+    public TextMeshProUGUI FailedScore; // Reference to the UI Text component
 
 
     // Define an action to be called when the high score increases
@@ -21,6 +22,12 @@ public class HighScoreManager : MonoBehaviour
     public static Action OnResetScore;
     public static Action OnResetHighScore;
     public static Action OnAddNewHighscore;
+    public static Action OnGetScore;
+    public static HighScoreManager Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void OnEnable()
     {
@@ -28,6 +35,7 @@ public class HighScoreManager : MonoBehaviour
         OnResetScore += ResetScore;
         OnResetHighScore += ResetHighScore;
         OnAddNewHighscore += SetNewHighScore;
+   
     }
     private void OnDisable()
     {
@@ -48,6 +56,7 @@ public class HighScoreManager : MonoBehaviour
         if (CurrentScore != null)
         {
             CurrentScore.text = Score.ToString();
+            FailedScore.text = Score.ToString();
         }
         if (highScore > PlayerPrefs.GetInt("HighScore"))
         {
@@ -62,6 +71,7 @@ public class HighScoreManager : MonoBehaviour
         if (CurrentScore != null)
         {
             CurrentScore.text = Score.ToString();
+            FailedScore.text = Score.ToString();
         }
     }
     public void ResetHighScore()

@@ -77,7 +77,7 @@ public class Car : MonoBehaviour
     private void Update()
     {
         // Check for mouse click
-        if (Input.GetMouseButtonDown(0) && !isMoving && !GameManager.Instance.isGameOver)
+        if (Input.GetMouseButtonDown(0) && !isMoving && !GameManager.Instance.isGameOver && !UIManager.instance.isPause)
         {
             // Cast a ray from the camera to the mouse position
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

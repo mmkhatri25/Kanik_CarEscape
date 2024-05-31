@@ -34,20 +34,24 @@ public class UIManager : MonoBehaviour
     public GameObject persistentObject;
     public GameObject[] rootObjects;
     public GameObject mainMenu;
+    public bool isPause;
     public void OnPauseBtn()
     {
         HighScoreManager.OnAddNewHighscore?.Invoke();
         PausePopup.SetActive(true);
         Time.timeScale = 0;
-
+        isPause = true;
     }
     public void OnClosePause()
     {
         Time.timeScale = 1;
         PausePopup.SetActive(false);
+        isPause = false;
+
     }
     public void MainManuButton()
     {
+        isPause = false;
         HighScoreManager.OnAddNewHighscore?.Invoke();
         SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
         //if (persistentObject != null)
@@ -63,6 +67,8 @@ public class UIManager : MonoBehaviour
     }
     public void LoadNewScene(int sceneIndex)
     {
+        isPause = false;
+
         // Destroy all objects in the current hierarchy
         DestroyAllObjectsInHierarchy();
 

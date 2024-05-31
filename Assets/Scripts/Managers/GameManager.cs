@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
     public GameObject level_lose_UI;
     [Space]
     public TextMeshProUGUI m_total_coin_text;
-    public TextMeshProUGUI higscoreText, TimeoutText;
+    public TextMeshProUGUI ScoreFailed, TimeoutText;
 
     public CanvasGroup logoScreen;
 
@@ -106,6 +106,8 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         isGameOver = false;
         timeout = false;
+        UIManager.instance.isPause = false;
+
         HighScoreManager.OnResetHighScore?.Invoke();
         HighScoreManager.OnResetScore?.Invoke();
         mainMenu.SetActive(false);
@@ -284,8 +286,8 @@ public class GameManager : MonoBehaviour
     {
         carEscaped = car;
         HighScoreManager.onHighScoreIncrease?.Invoke(10);
-        CurrentScore += 10;
-        higscoreText.text = CurrentScore.ToString();
+        //CurrentScore += 10;
+        //higscoreText.text = HighScoreManager.Instance.Score.ToString();//CurrentScore.ToString();
         // spawn coin
         Instantiate(coinPrefab, car.transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
 
@@ -326,8 +328,8 @@ public class GameManager : MonoBehaviour
     public void LevelFinished()
     {
         CurrentScore = 0;
-        higscoreText.text = "";
-        HighScoreManager.OnResetScore?.Invoke();
+        //ScoreFailed.text = "";
+         //HighScoreManager.OnResetScore?.Invoke();
         // show ads on level finished
         Debug.Log("Level Finished !");
         m_total_coin_text.transform.parent.gameObject.SetActive(false);
@@ -345,6 +347,8 @@ public class GameManager : MonoBehaviour
     {
         isGameOver = false;
         timeout = false;
+        UIManager.instance.isPause = false;
+
         HighScoreManager.OnResetHighScore?.Invoke();
         HighScoreManager.OnResetScore?.Invoke();
 
@@ -520,6 +524,7 @@ public class GameManager : MonoBehaviour
 
     public void LevelLose()
     {
+
         if (isGameOver)
             return;
 
@@ -529,14 +534,13 @@ public class GameManager : MonoBehaviour
             TimeoutText.gameObject.SetActive(false);
 
         isGameOver = true;
-        
-        
         timeout = false;
-        
-        HighScoreManager.OnResetScore?.Invoke();
+        //ScoreFailed.text = HighScoreManager.Instance.Score.ToString();
+
+        //HighScoreManager.OnResetScore?.Invoke();
         HighScoreManager.OnAddNewHighscore?.Invoke();
 
-        higscoreText.text = CurrentScore.ToString();//PlayerPrefs.GetInt("HighScore").ToString();
+
 
         level_lose_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_FAIL");
         level_lose_UI.SetActive(true);

@@ -3481,7 +3481,7 @@ GameObject:
   - component: {fileID: 910125387}
   - component: {fileID: 910125386}
   m_Layer: 5
-  m_Name: ScoreCurrent
+  m_Name: ScoreFailed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4738,7 +4738,7 @@ GameObject:
   - component: {fileID: 1074576801}
   - component: {fileID: 1074576800}
   m_Layer: 5
-  m_Name: Score
+  m_Name: InGameScore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5187,6 +5187,7 @@ MonoBehaviour:
   highScore: 0
   Score: 0
   CurrentScore: {fileID: 1074576800}
+  FailedScore: {fileID: 910125386}
 --- !u!1 &1602198871
 GameObject:
   m_ObjectHideFlags: 0
@@ -5700,7 +5701,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: TRAFIC
+  m_text: TRAFFIC
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c1af484ae77ba3f4e95d8f15df68d068, type: 2}
   m_sharedMaterial: {fileID: 5892706105581070383, guid: c1af484ae77ba3f4e95d8f15df68d068,
@@ -5770,7 +5771,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 1682752010}
-    characterCount: 6
+    characterCount: 7
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -6473,6 +6474,11 @@ PrefabInstance:
       propertyPath: FadeScreen
       value: 
       objectReference: {fileID: 2109472637}
+    - target: {fileID: 2044245615438865064, guid: 25523b4c28cd40545a0ca5b7e9a7bf8d,
+        type: 3}
+      propertyPath: ScoreFailed
+      value: 
+      objectReference: {fileID: 910125386}
     - target: {fileID: 2294312438725178499, guid: 25523b4c28cd40545a0ca5b7e9a7bf8d,
         type: 3}
       propertyPath: delay
