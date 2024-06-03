@@ -309,7 +309,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2, y: 2, z: 2}
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &97324941
 MeshRenderer:
@@ -476,7 +476,7 @@ PrefabInstance:
     - target: {fileID: 6383814659745096680, guid: 643dbe78d9a966946900eb71e66b9855,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.272
+      value: 1.63
       objectReference: {fileID: 0}
     - target: {fileID: 6383814659745096680, guid: 643dbe78d9a966946900eb71e66b9855,
         type: 3}
@@ -2051,6 +2051,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_FullLeftTurn (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8330707431153586429, guid: 1dbca010d6e27ca46b278f2af84d7ccd,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dbca010d6e27ca46b278f2af84d7ccd, type: 3}

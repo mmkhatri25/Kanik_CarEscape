@@ -86,7 +86,9 @@ public class Pedestrian : MonoBehaviour
     Collider other;
     public void OnTriggerEnter(Collider c)
     {
-        Debug.Log("");
+        if (UIManager.instance.isTestLevel)
+            return;
+
         if (c.tag == "Car")
         {
             other = c;

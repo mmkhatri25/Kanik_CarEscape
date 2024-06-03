@@ -82,23 +82,12 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    private void Awake()
-    {
-        //PlayerPrefs.SetInt("Level", 29);
-    }
 
     void Start()
     {
         // Subscribe to the sceneLoaded event
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        //if (SceneManager.GetActiveScene().name == "StartScene")
-        //{
-        //    Invoke("InitGame", 1.5f);
-        //}
-
-        //OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-    
     }
 
     public void OnStartButton()
@@ -112,28 +101,26 @@ public class GameManager : MonoBehaviour
         HighScoreManager.OnResetScore?.Invoke();
         mainMenu.SetActive(false);
         FadeScreen.SetActive(true);
-        //if (SceneManager.GetActiveScene().name == "StartScene")
-        //{
-            Invoke("InitGame", .3f);
-        //}
-
-        //OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-
+        Invoke("InitGame", .3f);
     }
 
     void Update()
     {
         if (timerIsRunning)
         {
-            if (timeRemaining > 0)
+            if (timeRemaining > 0.5f)
             {
                 timeRemaining -= Time.deltaTime;
                 DisplayTime(timeRemaining);
             }
             else
             {
+                Time.timeScale = 0;
                 // Time has run out
                 timeRemaining = 0;
+                float minutes = Mathf.FloorToInt(timeRemaining / 60);
+                float seconds = Mathf.FloorToInt(timeRemaining % 60);
+                timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
                 timerIsRunning = false;
                 if (!UIManager.Instance.isTestLevel)
                     ShowPopup();
@@ -160,7 +147,7 @@ public class GameManager : MonoBehaviour
     {
         //SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
         Debug.Log("InitGame called");
-
+        //PlayerPrefs.SetInt("Level", 87);
         currentLevel = PlayerPrefs.GetInt("Level", 0);
         if (currentLevel == 0)
         {
@@ -169,24 +156,39 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        //Debug.Log("Starting Level: " + currentLevel);
-        LoadNextLevel(currentLevel);
+        //if (UIManager.instance.isTestLevel)
+        //    LoadNextLevel();
+        //else
+            LoadNextLevel(currentLevel);
+
     }
 
     void LoadNextLevel(int currentLevel)
     {
-        if (currentLevel <= 15)
+
+        //if (UIManager.instance.isTestLevel)
+        //{
+        //    LoadNextLevel();
+
+        //}
+        //else
         {
-            int nextLevel = GetNextRandomLevelWithinFirst15();
-            LoadLevel(nextLevel);
-            //Debug.Log("LoadNextLevel --1, next level: " + nextLevel);
+            Debug.Log("Starting Level: " + currentLevel);
+
+            if (currentLevel <= 15)
+            {
+                int nextLevel = GetNextRandomLevelWithinFirst15();
+                LoadLevel(nextLevel);
+                //Debug.Log("LoadNextLevel --1, next level: " + nextLevel);
+            }
+            else
+            {
+                // Load random levels from 16 to 100 without repetition until all levels are played
+                int nextLevel = GetNextRandomLevel();
+                LoadLevel(nextLevel);
+            }
         }
-        else
-        {
-            // Load random levels from 16 to 100 without repetition until all levels are played
-            int nextLevel = GetNextRandomLevel();
-            LoadLevel(nextLevel);
-        }
+       
     }
 
     int GetNextRandomLevelWithinFirst15()
@@ -251,6 +253,7 @@ public class GameManager : MonoBehaviour
 
             SceneManager.LoadScene("Level_" + fallbackLevel);
         }
+       UIManager.instance.level_text.text = "LEVEL " + level;
     }
 
 
@@ -293,7 +296,7 @@ public class GameManager : MonoBehaviour
 
         CarsInLevel.Remove(car.GetComponent<Car>());
 
-        if (CarsInLevel.Count <= 0)
+        if (CarsInLevel.Count <= 0 && !timerIsRunning)
         {
             Debug.Log("timeRemaining - "+ timeRemaining);
             HighScoreManager.onHighScoreIncrease?.Invoke((int) timeRemaining); 
@@ -327,6 +330,7 @@ public class GameManager : MonoBehaviour
 
     public void LevelFinished()
     {
+
         CurrentScore = 0;
         //ScoreFailed.text = "";
          //HighScoreManager.OnResetScore?.Invoke();
@@ -362,26 +366,27 @@ public class GameManager : MonoBehaviour
         Invoke("LoadNextLevel", .1f);
     }
 
-    public void SkipLevel()
-    {
-        LoadNextLevel();
-    }
+    //public void SkipLevel()
+    //{
+    //    LoadNextLevel();
+    //}
 
     void LoadNextLevel()
     {
         //CurrentScore = 0;
         //higscoreText.text = CurrentScore.ToString(); 
         int currentLevel = PlayerPrefs.GetInt("Level");
-        currentLevel++;
-
+        //if(currentLevel!=1)
+            currentLevel++;
+        Debug.Log("next level - "+ currentLevel);
         // Save the new current level
         PlayerPrefs.SetInt("Level", currentLevel);
         PlayerPrefs.Save();
 
         // Load the next level
-        //LoadNextLevel(currentLevel);
+        LoadLevel(currentLevel);
 
-        ShowLogoScreen();
+        //ShowLogoScreen();
     }
     void ShowLogoScreen1()
     {

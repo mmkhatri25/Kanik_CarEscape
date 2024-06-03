@@ -433,6 +433,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car_FullLeftTurn
       objectReference: {fileID: 0}
+    - target: {fileID: 8330707431153586429, guid: 1dbca010d6e27ca46b278f2af84d7ccd,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dbca010d6e27ca46b278f2af84d7ccd, type: 3}
 --- !u!1001 &165315660
@@ -707,6 +712,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_FullLeftTurn
+      objectReference: {fileID: 0}
+    - target: {fileID: 8330707431153586429, guid: 1dbca010d6e27ca46b278f2af84d7ccd,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dbca010d6e27ca46b278f2af84d7ccd, type: 3}
@@ -1030,6 +1040,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_FullRightTurn
+      objectReference: {fileID: 0}
+    - target: {fileID: 5545629606134097218, guid: 17c55e1c0f10be64fa8da055fa6c8249,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 17c55e1c0f10be64fa8da055fa6c8249, type: 3}
@@ -1606,7 +1621,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 92
+  field of view: 51.3
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1632,7 +1647,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.6318381, y: 0.0023258016, z: -0.0018958305, w: 0.7750946}
-  m_LocalPosition: {x: 1.74, y: 6.95, z: 0.89}
+  m_LocalPosition: {x: 1.64, y: 6.95, z: 0.89}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1883,7 +1898,7 @@ PrefabInstance:
     - target: {fileID: 737859111083171007, guid: 831071512ce66d148808afa77bd2de2a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.8949997
+      value: 3.23
       objectReference: {fileID: 0}
     - target: {fileID: 737859111083171007, guid: 831071512ce66d148808afa77bd2de2a,
         type: 3}
@@ -2078,6 +2093,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car_RightTurn
       objectReference: {fileID: 0}
+    - target: {fileID: 8700111452666716132, guid: 831071512ce66d148808afa77bd2de2a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 831071512ce66d148808afa77bd2de2a, type: 3}
 --- !u!1 &1435314783
@@ -2217,6 +2237,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_LeftTurn
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795043293267841836, guid: 219ab0f70441aba429c4914a528de236,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9015439542350401036, guid: 219ab0f70441aba429c4914a528de236,
         type: 3}
@@ -2433,6 +2458,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_FullRightTurn
+      objectReference: {fileID: 0}
+    - target: {fileID: 5545629606134097218, guid: 17c55e1c0f10be64fa8da055fa6c8249,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 17c55e1c0f10be64fa8da055fa6c8249, type: 3}
@@ -2804,6 +2834,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car_Forward
+      objectReference: {fileID: 0}
+    - target: {fileID: 123616454696244051, guid: 643dbe78d9a966946900eb71e66b9855,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6383814659745096680, guid: 643dbe78d9a966946900eb71e66b9855,
         type: 3}

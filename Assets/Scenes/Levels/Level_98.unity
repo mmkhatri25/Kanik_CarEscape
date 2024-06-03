@@ -5680,7 +5680,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1418417813}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.27, y: 0.37698865, z: -1.03}
+  m_LocalPosition: {x: -1.27, y: 0.37698865, z: -1.14}
   m_LocalScale: {x: 0.6, y: 0.5, z: 0.6}
   m_Children: []
   m_Father: {fileID: 1899056087}
@@ -7888,6 +7888,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car_FullLeftTurn
       objectReference: {fileID: 0}
+    - target: {fileID: 8330707431153586429, guid: 1dbca010d6e27ca46b278f2af84d7ccd,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dbca010d6e27ca46b278f2af84d7ccd, type: 3}
 --- !u!1 &1954493886
@@ -8199,10 +8204,10 @@ Transform:
   - {fileID: 1560653621}
   - {fileID: 1104898581}
   - {fileID: 1441689096}
+  - {fileID: 1496058243}
   - {fileID: 224429587}
   - {fileID: 1157501357}
   - {fileID: 164353330}
-  - {fileID: 1496058243}
   - {fileID: 186778068}
   - {fileID: 768610340}
   - {fileID: 960758507}

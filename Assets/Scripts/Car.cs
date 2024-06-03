@@ -315,6 +315,8 @@ public class Car : MonoBehaviour
 
     void OnTriggerEnter(Collider c)
     {
+        if (GameManager.Instance.isGameOver)
+            return;
         Debug.Log("car - OnTriggerEnter, " + c.gameObject.name);
         if(c.tag == "Car")
         {

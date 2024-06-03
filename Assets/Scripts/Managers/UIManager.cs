@@ -67,7 +67,6 @@ public class UIManager : MonoBehaviour
     }
     public void LoadNewScene(int sceneIndex)
     {
-        isPause = false;
 
         // Destroy all objects in the current hierarchy
         DestroyAllObjectsInHierarchy();
@@ -215,7 +214,7 @@ public class UIManager : MonoBehaviour
             //TwoLaneUnlockedUI.SetActive(true);//my workd
         }
 
-        level_text.text = "LEVEL " + currentlvl.ToString();
+        //level_text.text = "LEVEL " + currentlvl.ToString();
     }
 
     private void CoinsAdded()
