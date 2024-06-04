@@ -79,6 +79,8 @@ public class GameManager : MonoBehaviour
     private bool timerIsRunning = false;
     public int CurrentScore;
     public GameObject mainMenu, FadeScreen;
+    GameObject carEscaped;
+    public bool timeout, levelFinished;
 
     #endregion
 
@@ -103,6 +105,23 @@ public class GameManager : MonoBehaviour
         FadeScreen.SetActive(true);
         Invoke("InitGame", .3f);
     }
+    void InitGame()
+    {
+        Debug.Log("InitGame called");
+        currentLevel = PlayerPrefs.GetInt("Level", 0);
+        if (currentLevel == 0)
+        {
+            currentLevel = 1;
+            PlayerPrefs.SetInt("Level", currentLevel);
+            PlayerPrefs.Save();
+        }
+
+        //if (UIManager.instance.isTestLevel)
+        //    LoadNextLevel();
+        //else
+        LoadNextLevel(currentLevel);
+
+    }
 
     void Update()
     {
@@ -115,7 +134,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                Time.timeScale = 0;
                 // Time has run out
                 timeRemaining = 0;
                 float minutes = Mathf.FloorToInt(timeRemaining / 60);
@@ -139,28 +157,7 @@ public class GameManager : MonoBehaviour
     void ShowPopup()
     {
         timeout = true;
-        //popup.SetActive(true); // Show the popup
         LevelLose();
-    }
-
-    void InitGame()
-    {
-        //SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-        Debug.Log("InitGame called");
-        //PlayerPrefs.SetInt("Level", 87);
-        currentLevel = PlayerPrefs.GetInt("Level", 0);
-        if (currentLevel == 0)
-        {
-            currentLevel = 1;
-            PlayerPrefs.SetInt("Level", currentLevel);
-            PlayerPrefs.Save();
-        }
-
-        //if (UIManager.instance.isTestLevel)
-        //    LoadNextLevel();
-        //else
-            LoadNextLevel(currentLevel);
-
     }
 
     void LoadNextLevel(int currentLevel)
@@ -176,6 +173,8 @@ public class GameManager : MonoBehaviour
             Debug.Log("Starting Level: " + currentLevel);
 
             if (currentLevel <= 15)
+            //if (currentLevel <= 3)
+
             {
                 int nextLevel = GetNextRandomLevelWithinFirst15();
                 LoadLevel(nextLevel);
@@ -238,19 +237,11 @@ public class GameManager : MonoBehaviour
 
         if (IsSceneExists(levelName))
         {
-            //Debug.Log("IsSceneExists Loading Level: " + levelName + " , IsSceneExists - " + IsSceneExists(levelName));
-            //FadeScreen.SetActive(false);
-
             SceneManager.LoadScene(levelName);
-            //PlayerPrefs.SetInt("Level", level);
-            //PlayerPrefs.Save();
         }
         else
         {
-            // Fallback in case the level scene does not exist
             int fallbackLevel = UnityEngine.Random.Range(10, 99);
-            //Debug.LogWarning("Level does not exist, loading fallback level: Level_" + fallbackLevel);
-
             SceneManager.LoadScene("Level_" + fallbackLevel);
         }
        UIManager.instance.level_text.text = "LEVEL " + level;
@@ -282,22 +273,19 @@ public class GameManager : MonoBehaviour
         OnCarHit?.Invoke();
     }
 
-    GameObject carEscaped;
-    public bool timeout;
+ 
 
     public void CarEscape(GameObject car)
     {
         carEscaped = car;
         HighScoreManager.onHighScoreIncrease?.Invoke(10);
-        //CurrentScore += 10;
-        //higscoreText.text = HighScoreManager.Instance.Score.ToString();//CurrentScore.ToString();
-        // spawn coin
         Instantiate(coinPrefab, car.transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
 
         CarsInLevel.Remove(car.GetComponent<Car>());
 
-        if (CarsInLevel.Count <= 0 && !timerIsRunning)
+        if (CarsInLevel.Count <= 0)
         {
+            levelFinished = true;
             Debug.Log("timeRemaining - "+ timeRemaining);
             HighScoreManager.onHighScoreIncrease?.Invoke((int) timeRemaining); 
             coinsEarnedInCurrentLevel = carsInitialCount * 2;
@@ -330,11 +318,7 @@ public class GameManager : MonoBehaviour
 
     public void LevelFinished()
     {
-
         CurrentScore = 0;
-        //ScoreFailed.text = "";
-         //HighScoreManager.OnResetScore?.Invoke();
-        // show ads on level finished
         Debug.Log("Level Finished !");
         m_total_coin_text.transform.parent.gameObject.SetActive(false);
         UpdateCoins(GameManager.Instance.coinsEarnedInCurrentLevel);
@@ -349,14 +333,12 @@ public class GameManager : MonoBehaviour
     }
     public void MainMenu()
     {
+        levelFinished = false;
         isGameOver = false;
         timeout = false;
         UIManager.instance.isPause = false;
-
         HighScoreManager.OnResetHighScore?.Invoke();
         HighScoreManager.OnResetScore?.Invoke();
-
-        //ShowLogoScreen1();
         SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
         mainMenu.SetActive(true);
     }
@@ -366,27 +348,16 @@ public class GameManager : MonoBehaviour
         Invoke("LoadNextLevel", .1f);
     }
 
-    //public void SkipLevel()
-    //{
-    //    LoadNextLevel();
-    //}
-
     void LoadNextLevel()
     {
-        //CurrentScore = 0;
-        //higscoreText.text = CurrentScore.ToString(); 
+        levelFinished = false;
+
         int currentLevel = PlayerPrefs.GetInt("Level");
-        //if(currentLevel!=1)
-            currentLevel++;
+        currentLevel++;
         Debug.Log("next level - "+ currentLevel);
-        // Save the new current level
         PlayerPrefs.SetInt("Level", currentLevel);
-        PlayerPrefs.Save();
-
-        // Load the next level
-        LoadLevel(currentLevel);
-
-        //ShowLogoScreen();
+        LoadNextLevel(currentLevel);
+        //LoadLevel(currentLevel);
     }
     void ShowLogoScreen1()
     {
@@ -402,37 +373,9 @@ public class GameManager : MonoBehaviour
                 //RestartAndroidApp();
             });
     }
-    private void RestartAndroidApp()
-    {
-        Debug.Log("1 RestartAndroidApp");
-
-        // Obtain the UnityPlayer class and the current activity
-        using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-        {
-            AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            AndroidJavaObject pm = currentActivity.Call<AndroidJavaObject>("getPackageManager");
-            AndroidJavaObject launchIntent = pm.Call<AndroidJavaObject>("getLaunchIntentForPackage", Application.identifier);
-
-            // Set the FLAG_ACTIVITY_CLEAR_TOP flag to clear the back stack
-            launchIntent.Call<AndroidJavaObject>("addFlags", 0x20000000); // FLAG_ACTIVITY_CLEAR_TOP
-
-            // Use a handler to restart the app
-            AndroidJavaRunnable restartRunnable = new AndroidJavaRunnable(() =>
-            {
-                currentActivity.Call("startActivity", launchIntent);
-                currentActivity.Call("finish");
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
-            });
-
-            currentActivity.Call("runOnUiThread", restartRunnable);
-        }
-
-        // Close the app
-        System.Diagnostics.Process.GetCurrentProcess().Kill();
-    }
+    
     void ShowLogoScreen()
     {
-        // Set the initial alpha to 0
         logoScreen.alpha = 0f;
 
         logoScreen.gameObject.SetActive(true);
@@ -442,15 +385,7 @@ public class GameManager : MonoBehaviour
             {
                 int currentLevel = PlayerPrefs.GetInt("Level");
                 LoadNextLevel(currentLevel);
-                //if (SceneExists("Level_" + currentLevel))
-                //{
-                //    Debug.Log("Level is " + currentLevel);
-                //    SceneManager.LoadScene("Level_" + currentLevel);
-                //}
-                //else
-                //{
-                //    SceneManager.LoadScene("Level_" + UnityEngine.Random.Range(10, 30));
-                //}
+         
             });
     }
 
@@ -472,10 +407,6 @@ public class GameManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //CurrentScore = 0;
-        //higscoreText.text = CurrentScore.ToString();
-
-        // Check if the loaded scene is the one you are interested in
         if (scene.name.Contains("Level"))
         {
             In_game_UI.SetActive(true);
@@ -530,7 +461,7 @@ public class GameManager : MonoBehaviour
     public void LevelLose()
     {
 
-        if (isGameOver)
+        if (isGameOver || levelFinished)
             return;
 
         if (timeout && !isGameOver)
@@ -540,13 +471,7 @@ public class GameManager : MonoBehaviour
 
         isGameOver = true;
         timeout = false;
-        //ScoreFailed.text = HighScoreManager.Instance.Score.ToString();
-
-        //HighScoreManager.OnResetScore?.Invoke();
         HighScoreManager.OnAddNewHighscore?.Invoke();
-
-
-
         level_lose_UI.GetComponent<DOTweenAnimation>().DORestartAllById("LVL_FAIL");
         level_lose_UI.SetActive(true);
         Debug.Log("YOU LOST !");

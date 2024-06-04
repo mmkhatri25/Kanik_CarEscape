@@ -96,6 +96,9 @@ public class Car : MonoBehaviour
     }
     void FixedUpdate()
     {
+        if (GameManager.Instance.isGameOver)
+            return;
+        //Debug.Log(this.gameObject + " FixedUpdate - "+ isMoving);
         if (didHitSomeone)
             return;
 
